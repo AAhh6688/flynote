@@ -1,0 +1,14 @@
+* {
+  margin: 0;
+  padding: 0;
+  box-sizing: border-box;
+}
+body {
+  font-family: "Microsoft Yahei", sans-serif;
+  color: #333;
+  background-color: #f9f9f9;
+}
+/* 适配移动端底部播放器 */
+body {
+  padding-bottom: 70px;
+}
