@@ -9,9 +9,10 @@
         :icon="isPlaying ? 'el-icon-pause' : 'el-icon-play'" 
         @click="togglePlay"
         type="primary"
+        :disabled="!currentMusic?.url"
       >{{ isPlaying ? '暂停' : '播放' }}</el-button>
       <el-button icon="el-icon-refresh-right" @click="nextMusic">下一曲</el-button>
-      <audio ref="audioRef" :src="currentMusic?.url" @ended="nextMusic"></audio>
+      <audio ref="audioRef" :src="currentMusic?.url" @ended="nextMusic" @error="playError"></audio>
     </div>
   </div>
 </template>
@@ -29,20 +30,32 @@ const isPlaying = ref(false)
 
 // 监听当前歌曲变化，自动播放
 watch(() => props.currentMusic, (newVal) => {
-  if (newVal) {
+  if (newVal && newVal.url) {
     isPlaying.value = true
-    audioRef.value.play()
+    audioRef.value.play().catch(err => {
+      ElMessage.error('播放失败：' + err.message)
+      isPlaying.value = false
+    })
   }
 })
 
 // 播放/暂停切换
 const togglePlay = () => {
+  if (!currentMusic.value?.url) return
   if (isPlaying.value) {
     audioRef.value.pause()
   } else {
-    audioRef.value.play()
+    audioRef.value.play().catch(err => {
+      ElMessage.error('播放失败：' + err.message)
+    })
   }
   isPlaying.value = !isPlaying.value
+}
+
+// 播放错误提示
+const playError = () => {
+  ElMessage.error('音频播放失败，请检查播放链接是否有效')
+  isPlaying.value = false
 }
 
 // 上一曲/下一曲（简易版，可自行扩展）
