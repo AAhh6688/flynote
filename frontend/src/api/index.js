@@ -1,7 +1,7 @@
 import axios from 'axios'
 
 // 后端接口地址（部署后替换为你的Docker后端地址，如：https://music-backend.xxx.com）
-const baseURL = import.meta.env.PROD ? 'https://your-backend-domain.com' : '/api'
+const baseURL = import.meta.env.PROD ? 'https://music.gdstudio.org' : '/api'
 
 // 创建请求实例
 const request = axios.create({
@@ -34,3 +34,4 @@ export const getLyrics = async (songId) => {
     return { data: '暂无歌词' }
   }
 }
+
