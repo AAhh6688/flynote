@@ -1,60 +1,51 @@
-/* 全局样式重置 */
+/* 和原WIN10桌面版完全一致的样式 */
 * {
   margin: 0;
   padding: 0;
   box-sizing: border-box;
 }
 
-/* 和原项目一致的字体 */
+/* 原项目字体（WIN10微软雅黑） */
 body {
   font-family: "Microsoft YaHei", "PingFang SC", sans-serif;
   font-size: 14px;
   color: #333;
   background-color: #f9f9f9;
-  /* 底部播放器预留空间 */
-  padding-bottom: 80px;
+  padding-bottom: 80px; /* 底部播放器预留空间 */
 }
 
-/* 布局样式（和原项目一致） */
+/* 原项目布局（和桌面版一致） */
 .container {
   max-width: 1200px;
   margin: 0 auto;
   padding: 0 20px;
 }
 
-/* 导航栏样式 */
+/* 原项目导航栏样式 */
 .navbar {
   height: 60px;
   line-height: 60px;
-  background-color: #fff;
+  background: #fff;
   border-bottom: 1px solid #eee;
   box-shadow: 0 2px 4px rgba(0,0,0,0.05);
+  position: sticky;
+  top: 0;
+  z-index: 999;
 }
 
-/* 按钮/输入框样式（和原项目一致） */
+/* 原项目按钮/输入框样式 */
 .el-button {
   border-radius: 4px;
+  font-family: "Microsoft YaHei";
 }
 .el-input__inner {
   border-radius: 4px;
   height: 40px;
   line-height: 40px;
+  font-family: "Microsoft YaHei";
 }
 
-/* 滚动条美化 */
-::-webkit-scrollbar {
-  width: 6px;
-  height: 6px;
-}
-::-webkit-scrollbar-thumb {
-  background: #ccc;
-  border-radius: 3px;
-}
-::-webkit-scrollbar-track {
-  background: #f1f1f1;
-}
-
-/* 移动端适配 */
+/* 移动端适配（新增，原桌面版无） */
 @media (max-width: 768px) {
   .container {
     padding: 0 10px;
