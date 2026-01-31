@@ -4,17 +4,17 @@
   "version": "1.0.0",
   "type": "module",
   "scripts": {
-    "dev": "vite",
-    "build": "vite build",
+    "dev": "vite",        // 本地调试（替换桌面版启动命令）
+    "build": "vite build",// 网页打包（Cloudflare部署用）
     "preview": "vite preview"
   },
   "dependencies": {
-    "axios": "^1.6.8",
-    "element-plus": "^2.6.1",
-    "vue": "^3.4.21"
+    "vue": "^3.4.21",     // 网页版核心（替换桌面版框架）
+    "axios": "^1.6.8",    // 保留原请求库
+    "element-plus": "^2.6.1" // 原项目UI（和桌面版布局一致）
   },
   "devDependencies": {
-    "@vitejs/plugin-vue": "^5.0.4",
+    "@vitejs/plugin-vue": "^5.0.4", // Vite打包（网页版）
     "vite": "^5.2.8"
   }
 }
