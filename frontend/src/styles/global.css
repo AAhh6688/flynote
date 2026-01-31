@@ -5,15 +5,43 @@
   box-sizing: border-box;
 }
 
+/* 和原项目一致的字体 */
 body {
-  font-family: "Microsoft Yahei", "PingFang SC", sans-serif;
+  font-family: "Microsoft YaHei", "PingFang SC", sans-serif;
+  font-size: 14px;
   color: #333;
   background-color: #f9f9f9;
-  /* 给底部播放器留空间 */
+  /* 底部播放器预留空间 */
   padding-bottom: 80px;
 }
 
-/* 滚动条美化（可选） */
+/* 布局样式（和原项目一致） */
+.container {
+  max-width: 1200px;
+  margin: 0 auto;
+  padding: 0 20px;
+}
+
+/* 导航栏样式 */
+.navbar {
+  height: 60px;
+  line-height: 60px;
+  background-color: #fff;
+  border-bottom: 1px solid #eee;
+  box-shadow: 0 2px 4px rgba(0,0,0,0.05);
+}
+
+/* 按钮/输入框样式（和原项目一致） */
+.el-button {
+  border-radius: 4px;
+}
+.el-input__inner {
+  border-radius: 4px;
+  height: 40px;
+  line-height: 40px;
+}
+
+/* 滚动条美化 */
 ::-webkit-scrollbar {
   width: 6px;
   height: 6px;
@@ -24,4 +52,15 @@ body {
 }
 ::-webkit-scrollbar-track {
   background: #f1f1f1;
+}
+
+/* 移动端适配 */
+@media (max-width: 768px) {
+  .container {
+    padding: 0 10px;
+  }
+  .navbar {
+    height: 50px;
+    line-height: 50px;
+  }
 }
