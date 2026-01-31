@@ -1,14 +1,14 @@
 <template>
   <div class="player-bar">
     <div class="container">
-      <!-- 歌曲信息 -->
+      <!-- 原项目歌曲信息 -->
       <div class="song-info" v-if="currentSong">
         <div class="name">{{ currentSong.name }}</div>
         <div class="singer">{{ currentSong.singer }}</div>
       </div>
       
-      <!-- 播放控制 -->
-      <div class="player-controls">
+      <!-- 原项目播放控制 -->
+      <div class="controls">
         <el-button icon="el-icon-skip-back" @click="prevSong">上一曲</el-button>
         <el-button 
           :icon="isPlaying ? 'el-icon-pause' : 'el-icon-play'" 
@@ -19,19 +19,19 @@
         <el-button icon="el-icon-skip-forward" @click="nextSong">下一曲</el-button>
       </div>
       
-      <!-- 进度条 -->
-      <div class="progress-bar" v-if="currentSong">
+      <!-- 原项目进度条 -->
+      <div class="progress" v-if="currentSong">
         <el-slider 
           v-model="currentTime" 
           :max="duration" 
           @change="seek"
           width="200px"
         />
-        <span class="time">{{ formatTime(currentTime) }}/{{ formatTime(duration) }}</span>
+        <span>{{ formatTime(currentTime) }}/{{ formatTime(duration) }}</span>
       </div>
     </div>
     
-    <!-- 隐藏的音频标签 -->
+    <!-- 网页音频标签（替换桌面版播放组件） -->
     <audio 
       ref="audioRef" 
       :src="currentSong?.url" 
@@ -41,103 +41,87 @@
       @loadedmetadata="handleLoadedMetadata"
       @ended="handleEnded"
       @error="handleError"
+      hidden
     ></audio>
   </div>
 </template>
 
 <script setup>
-import { ref, defineProps, watch } from 'vue';
+import { ref, defineProps, defineEmits, watch } from 'vue';
 
-// 接收参数
 const props = defineProps({
-  currentSong: {
-    type: Object,
-    default: null
-  }
+  currentSong: { type: Object, default: null }
 });
+const emit = defineEmits(['getLyric']);
 
-// 触发事件
-const emit = defineEmits(['getLyrics']);
-
-// 响应式数据
 const audioRef = ref(null);
 const isPlaying = ref(false);
 const currentTime = ref(0);
 const duration = ref(0);
 
-// 监听当前歌曲变化
+// 监听歌曲变化（原项目逻辑）
 watch(() => props.currentSong, (newSong) => {
-  if (newSong && newSong.url) {
-    // 重置状态
+  if (newSong?.url) {
     isPlaying.value = false;
     currentTime.value = 0;
     duration.value = 0;
-    // 加载新音频
     audioRef.value.src = newSong.url;
     // 自动播放
     audioRef.value.play().then(() => {
       isPlaying.value = true;
-      // 获取歌词
-      emit('getLyrics', newSong.id, newSong.source);
-    }).catch(err => {
-      ElMessage.error(`播放失败：${err.message}`);
-    });
-  } else if (!newSong) {
+      emit('getLyric', newSong.id, newSong.source);
+    }).catch(err => ElMessage.error(`播放失败：${err.message}`));
+  } else {
     audioRef.value?.pause();
     isPlaying.value = false;
   }
 });
 
-// 播放/暂停切换
+// 原项目播放/暂停逻辑
 const togglePlay = () => {
   if (!props.currentSong) return;
   if (isPlaying.value) {
     audioRef.value.pause();
   } else {
-    audioRef.value.play().catch(err => {
-      ElMessage.error(`播放失败：${err.message}`);
-    });
+    audioRef.value.play().catch(err => ElMessage.error(`播放失败：${err.message}`));
   }
   isPlaying.value = !isPlaying.value;
 };
 
-// 上一曲/下一曲（简易版，可扩展）
-const prevSong = () => {
-  ElMessage.info('暂未实现上一曲，可自行扩展');
-};
-const nextSong = () => {
-  ElMessage.info('暂未实现下一曲，可自行扩展');
-};
+// 原项目上/下一曲（占位，可扩展）
+const prevSong = () => ElMessage.info('暂未实现上一曲');
+const nextSong = () => ElMessage.info('暂未实现下一曲');
 
-// 进度条控制
+// 进度条控制（原项目逻辑）
 const seek = (val) => {
   audioRef.value.currentTime = val;
   currentTime.value = val;
 };
 
-// 时间格式化
+// 时间格式化（原项目逻辑）
 const formatTime = (seconds) => {
   const min = Math.floor(seconds / 60);
   const sec = Math.floor(seconds % 60);
   return `${min.toString().padStart(2, '0')}:${sec.toString().padStart(2, '0')}`;
 };
 
-// 音频事件处理
-const handlePlay = () => { isPlaying.value = true; };
-const handlePause = () => { isPlaying.value = false; };
-const handleTimeUpdate = () => { currentTime.value = audioRef.value.currentTime; };
-const handleLoadedMetadata = () => { duration.value = audioRef.value.duration; };
+// 音频事件（原项目逻辑）
+const handlePlay = () => isPlaying.value = true;
+const handlePause = () => isPlaying.value = false;
+const handleTimeUpdate = () => currentTime.value = audioRef.value.currentTime;
+const handleLoadedMetadata = () => duration.value = audioRef.value.duration;
 const handleEnded = () => {
   isPlaying.value = false;
-  ElMessage.info('歌曲播放完毕');
+  ElMessage.info('播放完毕');
 };
 const handleError = () => {
   isPlaying.value = false;
-  ElMessage.error('音频播放失败，请检查播放链接是否有效');
+  ElMessage.error('播放失败，请检查音源');
 };
 </script>
 
 <style scoped>
+/* 原项目播放栏样式 */
 .player-bar {
   position: fixed;
   bottom: 0;
@@ -146,7 +130,7 @@ const handleError = () => {
   height: 80px;
   background: #fff;
   border-top: 1px solid #eee;
-  z-index: 999;
+  font-family: "Microsoft YaHei";
 }
 
 .player-bar .container {
@@ -163,33 +147,22 @@ const handleError = () => {
 .song-info .name {
   font-size: 14px;
   font-weight: 500;
-  color: #333;
 }
 
 .song-info .singer {
   font-size: 12px;
   color: #666;
-  margin-top: 5px;
 }
 
-.player-controls {
+.controls {
   display: flex;
   gap: 10px;
 }
 
-.progress-bar {
+.progress {
   display: flex;
   align-items: center;
   gap: 10px;
-}
-
-.time {
-  font-size: 12px;
-  color: #999;
-}
-
-audio {
-  display: none;
 }
 
 /* 移动端适配 */
@@ -197,7 +170,7 @@ audio {
   .player-bar {
     height: 70px;
   }
-  .progress-bar {
+  .progress {
     display: none;
   }
 }
