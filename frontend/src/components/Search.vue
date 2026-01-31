@@ -1,5 +1,6 @@
 <template>
   <div class="search-box">
+    <!-- 原项目搜索类型选择（歌曲/歌手/歌单/专辑） -->
     <el-select v-model="searchType" class="search-type" placeholder="搜索类型">
       <el-option label="歌曲" value="song" />
       <el-option label="歌手" value="singer" />
@@ -7,6 +8,7 @@
       <el-option label="专辑" value="album" />
     </el-select>
     
+    <!-- 原项目音源选择（支持第三方API） -->
     <el-select v-model="selectedSource" class="source-select" placeholder="选择音源">
       <el-option 
         v-for="item in sources" 
@@ -16,6 +18,7 @@
       />
     </el-select>
     
+    <!-- 原项目搜索框样式 -->
     <el-input
       v-model="keyword"
       placeholder="输入歌曲/歌手/歌单/专辑名"
@@ -29,24 +32,21 @@
 </template>
 
 <script setup>
-import { ref, getCurrentInstance } from 'vue';
-import { store } from '../store/index.js';
+import { ref, defineEmits } from 'vue';
+import { store } from '../store';
 
-// 响应式数据
+const emit = defineEmits(['search']);
 const searchType = ref('song');
 const keyword = ref('');
 const sources = ref(store.getSources());
-const selectedSource = ref(sources.value[0]?.url || '');
+const selectedSource = ref(sources.value[0]?.url);
 
-// 获取父组件的搜索方法
-const { proxy } = getCurrentInstance();
-
-// 搜索方法
+// 原项目搜索逻辑
 const handleSearch = () => {
   if (!keyword.value.trim()) {
     return ElMessage.warning('请输入搜索关键词！');
   }
-  proxy.searchHandler(searchType.value, keyword.value, selectedSource.value);
+  emit('search', searchType.value, keyword.value, selectedSource.value);
 };
 </script>
 
@@ -65,10 +65,6 @@ const handleSearch = () => {
 }
 
 .search-input {
-  width: 100%;
-}
-
-.el-button {
   width: 100%;
 }
 </style>
