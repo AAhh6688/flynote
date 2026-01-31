@@ -1,98 +1,107 @@
 <template>
-  <div class="app-wrapper">
-    <!-- 顶部导航 -->
+  <!-- 和原WIN10桌面版完全一致的布局 -->
+  <div class="app">
+    <!-- 顶部导航（原样式） -->
     <Navbar />
     
-    <!-- 主体内容 -->
+    <!-- 主体内容（原布局） -->
     <div class="container main-content">
-      <!-- 左侧：搜索+音源配置 -->
+      <!-- 左侧：搜索+音源配置（原位置） -->
       <div class="left-panel">
-        <Search />
+        <Search @search="handleSearch" />
         <SourceConfig />
       </div>
       
-      <!-- 中间：内容区（搜索结果/收藏） -->
+      <!-- 中间：内容区（搜索结果/收藏，原布局） -->
       <div class="center-panel">
         <el-tabs v-model="activeTab" type="card">
           <el-tab-pane label="搜索结果" name="search">
-            <Playlist :list="searchResult" @play="playSong" @collect="collectSong" />
+            <Playlist 
+              :list="searchResult" 
+              @play="handlePlay" 
+              @collect="handleCollect"
+            />
           </el-tab-pane>
           <el-tab-pane label="我的收藏" name="collect">
             <Collection 
-              :collectSongs="collectSongs" 
-              :collectPlaylists="collectPlaylists"
-              @play="playSong"
-              @remove="removeCollect"
+              :songs="collectSongs" 
+              :playlists="collectPlaylists"
+              @play="handlePlay"
+              @remove="handleRemoveCollect"
             />
           </el-tab-pane>
         </el-tabs>
       </div>
       
-      <!-- 右侧：歌词 -->
+      <!-- 右侧：歌词（原位置） -->
       <div class="right-panel">
-        <div class="lyrics-box">
+        <div class="lyric-box">
           <h3>歌词</h3>
-          <div class="lyrics-content">
-            <pre>{{ currentLyrics || '暂无歌词' }}</pre>
+          <div class="lyric-content">
+            <pre>{{ currentLyric }}</pre>
           </div>
         </div>
       </div>
     </div>
     
-    <!-- 底部播放控制栏 -->
+    <!-- 底部播放栏（原样式） -->
     <Player 
       :currentSong="currentSong" 
-      @getLyrics="getLyricsHandler"
+      @getLyric="handleGetLyric"
     />
   </div>
 </template>
 
 <script setup>
-import { ref, computed, onMounted } from 'vue';
+import { ref, computed } from 'vue';
 import Navbar from './components/Navbar.vue';
 import Search from './components/Search.vue';
 import SourceConfig from './components/SourceConfig.vue';
 import Playlist from './components/Playlist.vue';
 import Collection from './components/Collection.vue';
 import Player from './components/Player.vue';
-import { searchMusic, getLyrics } from './api/index.js';
-import { store } from './store/index.js';
+import { search, getLyric } from './api';
+import { store } from './store';
 
-// 响应式数据
+// 响应式数据（和原项目一致）
 const activeTab = ref('search');
 const searchResult = ref([]);
 const currentSong = ref(null);
-const currentLyrics = ref('');
+const currentLyric = ref('暂无歌词');
 const collectSongs = computed(() => store.getCollectSongs());
 const collectPlaylists = computed(() => store.getCollectPlaylists());
 
-// 搜索方法（传给Search组件）
-const searchHandler = async (type, keyword, source) => {
-  const res = await searchMusic(type, keyword, source);
+// 搜索（原项目功能）
+const handleSearch = async (type, keyword, source) => {
+  const res = await search(type, keyword, source);
   searchResult.value = res.data;
   activeTab.value = 'search';
 };
 
-// 播放歌曲
-const playSong = (song) => {
+// 播放歌曲（原项目功能）
+const handlePlay = (song) => {
   currentSong.value = song;
-  getLyricsHandler(song.id, song.source);
+  handleGetLyric(song.id, song.source);
 };
 
-// 获取歌词
-const getLyricsHandler = async (songId, source) => {
-  const res = await getLyrics(songId, source);
-  currentLyrics.value = res.data;
+// 获取歌词（原项目功能）
+const handleGetLyric = async (id, source) => {
+  const res = await getLyric(id, source);
+  currentLyric.value = res.data;
 };
 
-// 收藏歌曲
-const collectSong = (song) => {
-  store.addCollectSong(song);
+// 收藏（原项目功能）
+const handleCollect = (item) => {
+  if (item.type === 'playlist' || item.album) {
+    store.addCollectPlaylist(item);
+  } else {
+    store.addCollectSong(item);
+  }
   ElMessage.success('收藏成功！');
 };
 
-// 移除收藏
-const removeCollect = (type, id) => {
+// 取消收藏（原项目功能）
+const handleRemoveCollect = (type, id) => {
   if (type === 'song') {
     store.removeCollectSong(id);
   } else {
@@ -100,31 +109,22 @@ const removeCollect = (type, id) => {
   }
   ElMessage.success('取消收藏成功！');
 };
-
-// 暴露方法给子组件
-defineExpose({
-  searchHandler,
-  collectSong
-});
 </script>
 
 <style scoped>
-.app-wrapper {
-  min-height: 100vh;
-}
-
+/* 和原WIN10桌面版一致的布局样式 */
 .main-content {
   display: flex;
   gap: 20px;
   padding: 20px 0;
-  flex: 1;
+  min-height: calc(100vh - 140px);
 }
 
 .left-panel {
   width: 280px;
   display: flex;
   flex-direction: column;
-  gap: 20px;
+  gap: 15px;
 }
 
 .center-panel {
@@ -135,22 +135,23 @@ defineExpose({
   width: 300px;
 }
 
-.lyrics-box {
+.lyric-box {
   background: #fff;
   border-radius: 8px;
   padding: 15px;
   height: 400px;
 }
 
-.lyrics-content {
-  height: 320px;
+.lyric-content {
+  height: 340px;
   overflow-y: auto;
   line-height: 2;
   white-space: pre-wrap;
   color: #666;
+  font-family: "Microsoft YaHei";
 }
 
-/* 移动端适配 */
+/* 移动端适配（新增，不影响PC端原布局） */
 @media (max-width: 768px) {
   .main-content {
     flex-direction: column;
@@ -158,11 +159,11 @@ defineExpose({
   .left-panel, .right-panel {
     width: 100%;
   }
-  .lyrics-box {
+  .lyric-box {
     height: 200px;
   }
-  .lyrics-content {
-    height: 120px;
+  .lyric-content {
+    height: 140px;
   }
 }
 </style>
