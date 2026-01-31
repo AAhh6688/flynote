@@ -1,9 +1,14 @@
 <template>
   <nav class="navbar">
-    <div class="logo">开源音乐播放器（带歌词）</div>
-    <div class="nav-menu">
-      <span class="menu-item active">首页</span>
-      <span class="menu-item">我的收藏</span>
+    <div class="container">
+      <div class="logo">
+        <h2>开源音乐播放器</h2>
+      </div>
+      <div class="nav-menu">
+        <span class="menu-item">首页</span>
+        <span class="menu-item">排行榜</span>
+        <span class="menu-item">我的音乐</span>
+      </div>
     </div>
   </nav>
 </template>
@@ -14,35 +19,38 @@
 
 <style scoped>
 .navbar {
-  display: flex;
-  justify-content: space-between;
-  align-items: center;
-  padding: 15px 0;
-  border-bottom: 1px solid #eee;
+  position: sticky;
+  top: 0;
+  z-index: 999;
 }
-.logo {
-  font-size: 20px;
-  font-weight: bold;
+
+.logo h2 {
+  font-size: 18px;
   color: #2c3e50;
+  font-weight: 700;
 }
+
 .nav-menu {
   display: flex;
   gap: 30px;
 }
+
 .menu-item {
   cursor: pointer;
   color: #666;
+  font-size: 14px;
 }
-.menu-item.active {
+
+.menu-item:hover {
   color: #409eff;
-  font-weight: bold;
 }
+
 /* 移动端适配 */
 @media (max-width: 768px) {
   .nav-menu {
     gap: 15px;
   }
-  .logo {
+  .logo h2 {
     font-size: 16px;
   }
 }
