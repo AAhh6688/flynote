@@ -1,17 +1,15 @@
 <template>
   <nav class="navbar">
-    <div class="logo">开源音乐播放器</div>
+    <div class="logo">开源音乐播放器（带歌词）</div>
     <div class="nav-menu">
-      <span class="menu-item" :class="{ active: activeTab === 'home' }">首页</span>
-      <span class="menu-item" :class="{ active: activeTab === 'my' }">我的收藏</span>
-      <span class="menu-item" :class="{ active: activeTab === 'setting' }">音源设置</span>
+      <span class="menu-item active">首页</span>
+      <span class="menu-item">我的收藏</span>
     </div>
   </nav>
 </template>
 
 <script setup>
-import { ref } from 'vue'
-const activeTab = ref('home')
+// 无需额外逻辑
 </script>
 
 <style scoped>
