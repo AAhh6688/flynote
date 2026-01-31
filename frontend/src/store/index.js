@@ -1,21 +1,17 @@
-/**
- * 本地存储工具（收藏/音源配置）
- * 新手友好：无需数据库，直接存在浏览器本地
- */
+// 保留原项目收藏功能，仅替换存储方式（网页端localStorage）
 export const store = {
-  // 1. 音源配置
+  // 音源配置（支持添加第三方API）
   getSources() {
     const sources = localStorage.getItem('music_sources');
-    return sources ? JSON.parse(sources) : [
-      { name: '默认音源', url: 'https://music.gdstudio.org' }
-    ];
+    return sources ? JSON.parse(sources) : [{ name: '默认音源', url: 'https://music.gdstudio.org' }];
   },
   addSource(source) {
     const sources = this.getSources();
     sources.push(source);
     localStorage.setItem('music_sources', JSON.stringify(sources));
   },
-  // 2. 收藏单曲
+
+  // 收藏单曲（原项目功能）
   getCollectSongs() {
     const songs = localStorage.getItem('collect_songs');
     return songs ? JSON.parse(songs) : [];
@@ -32,7 +28,8 @@ export const store = {
     songs = songs.filter(item => item.id !== songId);
     localStorage.setItem('collect_songs', JSON.stringify(songs));
   },
-  // 3. 收藏歌单
+
+  // 收藏歌单（原项目功能）
   getCollectPlaylists() {
     const playlists = localStorage.getItem('collect_playlists');
     return playlists ? JSON.parse(playlists) : [];
