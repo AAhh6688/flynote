@@ -1,13 +1,8 @@
 <template>
   <div class="search-container">
-    <el-select v-model="selectedSource" class="source-select" placeholder="选择音源">
-      <el-option label="酷狗音乐" value="kugou" />
-      <el-option label="QQ音乐" value="qq" />
-      <el-option label="通用音源" value="common" />
-    </el-select>
     <el-input
       v-model="keyword"
-      placeholder="输入歌曲/歌手名搜索"
+      placeholder="输入歌曲/歌手名（如：周杰伦 晴天）"
       suffix-icon="el-icon-search"
       @keyup.enter="handleSearch"
       class="search-input"
@@ -19,16 +14,15 @@
 <script setup>
 import { ref, getCurrentInstance } from 'vue'
 const keyword = ref('')
-const selectedSource = ref('kugou') // 默认选择酷狗音乐
-// 获取父组件的searchMusic方法
+// 获取父组件的搜索方法
 const { proxy } = getCurrentInstance()
 
 const handleSearch = () => {
   if (!keyword.value.trim()) {
-    return ElMessage.warning('请输入搜索关键词')
+    return ElMessage.warning('请输入搜索关键词！')
   }
-  // 传递音源参数给父组件
-  proxy.searchMusic(keyword.value, selectedSource.value)
+  // 调用父组件的搜索方法
+  proxy.searchMusic(keyword.value)
 }
 </script>
 
@@ -39,9 +33,6 @@ const handleSearch = () => {
   padding: 10px 0;
   align-items: center;
 }
-.source-select {
-  width: 120px;
-}
 .search-input {
   flex: 1;
 }
@@ -50,9 +41,6 @@ const handleSearch = () => {
   .search-container {
     flex-direction: column;
     align-items: stretch;
-  }
-  .source-select {
-    width: 100%;
   }
 }
 </style>
