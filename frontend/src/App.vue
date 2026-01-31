@@ -4,10 +4,19 @@
     <Navbar />
     <!-- 搜索区 -->
     <Search />
-    <!-- 播放列表 -->
-    <Playlist :musicList="musicList" @play="playMusic" />
+    <!-- 主体内容：播放列表 + 歌词 -->
+    <div class="main-content">
+      <!-- 播放列表 -->
+      <Playlist :musicList="musicList" @play="playMusic" />
+      <!-- 歌词显示 -->
+      <Lyrics :currentLyrics="currentLyrics" />
+    </div>
     <!-- 播放控制栏 -->
-    <Player :currentMusic="currentMusic" />
+    <Player 
+      :currentMusic="currentMusic" 
+      :currentLyrics="currentLyrics"
+      @getLyrics="getLyrics"
+    />
   </div>
 </template>
 
@@ -16,33 +25,39 @@ import { ref } from 'vue'
 import Navbar from './components/Navbar.vue'
 import Search from './components/Search.vue'
 import Playlist from './components/Playlist.vue'
+import Lyrics from './components/Lyrics.vue'
 import Player from './components/Player.vue'
-import { searchMusic, getPlayUrl } from './api/index.js'
+import { searchMusic, getLyrics } from './api/index.js'
 
-// 全局音乐列表和当前播放歌曲
-const musicList = ref([])
-const currentMusic = ref(null)
+// 全局状态
+const musicList = ref([])       // 搜索结果列表
+const currentMusic = ref(null)  // 当前播放歌曲
+const currentLyrics = ref('')   // 当前歌词
 
-// 搜索歌曲（接收音源参数）
-const searchMusicHandler = async (keyword, source) => {
-  const res = await searchMusic(keyword, source)
+// 搜索歌曲（对接Search组件）
+const searchMusicHandler = async (keyword) => {
+  const res = await searchMusic(keyword)
   musicList.value = res.data
 }
 
-// 播放歌曲（先获取播放链接）
-const playMusic = async (music) => {
-  // 获取播放链接
-  const playRes = await getPlayUrl(music)
-  if (playRes.code === 0 && playRes.data.url) {
-    // 给歌曲添加播放链接
-    currentMusic.value = { ...music, url: playRes.data.url }
-  } else {
-    ElMessage.error(playRes.msg || '获取播放链接失败')
-  }
+// 播放歌曲（对接Playlist组件）
+const playMusic = (music) => {
+  currentMusic.value = music
+  // 自动获取歌词
+  getLyricsHandler(music.id)
 }
 
-// 暴露方法给Search组件
-defineExpose({ searchMusic: searchMusicHandler })
+// 获取歌词
+const getLyricsHandler = async (songId) => {
+  const res = await getLyrics(songId)
+  currentLyrics.value = res.data
+}
+
+// 暴露方法给子组件
+defineExpose({ 
+  searchMusic: searchMusicHandler,
+  getLyrics: getLyricsHandler
+})
 </script>
 
 <style scoped>
@@ -53,6 +68,18 @@ defineExpose({ searchMusic: searchMusicHandler })
   min-height: 100vh;
   display: flex;
   flex-direction: column;
+  gap: 15px;
+}
+.main-content {
+  display: flex;
   gap: 20px;
+  flex: 1;
+  margin: 10px 0;
+}
+/* 移动端适配：歌词和列表垂直排列 */
+@media (max-width: 768px) {
+  .main-content {
+    flex-direction: column;
+  }
 }
 </style>
