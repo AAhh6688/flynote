@@ -4,6 +4,7 @@ import 'element-plus/dist/index.css'
 import App from './App.vue'
 import './styles/global.css'
 
+// 创建应用
 const app = createApp(App)
 app.use(ElementPlus)
 app.mount('#app')
