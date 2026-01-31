@@ -1,30 +1,44 @@
 <template>
-  <div class="player-container">
-    <!-- 当前播放歌曲信息 -->
-    <div class="player-info" v-if="currentMusic">
-      <div class="name">{{ currentMusic.name }}</div>
-      <div class="singer">{{ currentMusic.singer }}</div>
+  <div class="player-bar">
+    <div class="container">
+      <!-- 歌曲信息 -->
+      <div class="song-info" v-if="currentSong">
+        <div class="name">{{ currentSong.name }}</div>
+        <div class="singer">{{ currentSong.singer }}</div>
+      </div>
+      
+      <!-- 播放控制 -->
+      <div class="player-controls">
+        <el-button icon="el-icon-skip-back" @click="prevSong">上一曲</el-button>
+        <el-button 
+          :icon="isPlaying ? 'el-icon-pause' : 'el-icon-play'" 
+          @click="togglePlay"
+          type="primary"
+          :disabled="!currentSong"
+        >{{ isPlaying ? '暂停' : '播放' }}</el-button>
+        <el-button icon="el-icon-skip-forward" @click="nextSong">下一曲</el-button>
+      </div>
+      
+      <!-- 进度条 -->
+      <div class="progress-bar" v-if="currentSong">
+        <el-slider 
+          v-model="currentTime" 
+          :max="duration" 
+          @change="seek"
+          width="200px"
+        />
+        <span class="time">{{ formatTime(currentTime) }}/{{ formatTime(duration) }}</span>
+      </div>
     </div>
-    <!-- 播放控制按钮 -->
-    <div class="player-controls">
-      <el-button 
-        icon="el-icon-play" 
-        @click="togglePlay"
-        type="primary"
-        :disabled="!currentMusic"
-      >{{ isPlaying ? '暂停' : '播放' }}</el-button>
-      <el-button 
-        icon="el-icon-refresh-right" 
-        @click="nextMusic"
-        :disabled="!currentMusic"
-      >下一曲</el-button>
-    </div>
+    
     <!-- 隐藏的音频标签 -->
     <audio 
       ref="audioRef" 
-      :src="currentMusic?.url" 
+      :src="currentSong?.url" 
       @play="handlePlay"
       @pause="handlePause"
+      @timeupdate="handleTimeUpdate"
+      @loadedmetadata="handleLoadedMetadata"
       @ended="handleEnded"
       @error="handleError"
     ></audio>
@@ -32,139 +46,159 @@
 </template>
 
 <script setup>
-import { ref, defineProps, watch } from 'vue'
+import { ref, defineProps, watch } from 'vue';
 
-// 接收父组件的参数
+// 接收参数
 const props = defineProps({
-  currentMusic: {
+  currentSong: {
     type: Object,
     default: null
-  },
-  currentLyrics: {
-    type: String,
-    default: ''
   }
-})
+});
 
-// 音频实例
-const audioRef = ref(null)
-// 播放状态
-const isPlaying = ref(false)
+// 触发事件
+const emit = defineEmits(['getLyrics']);
 
-// 监听当前歌曲变化（自动播放）
-watch(() => props.currentMusic, (newMusic) => {
-  if (newMusic && newMusic.url) {
-    // 重置播放状态
-    isPlaying.value = false
+// 响应式数据
+const audioRef = ref(null);
+const isPlaying = ref(false);
+const currentTime = ref(0);
+const duration = ref(0);
+
+// 监听当前歌曲变化
+watch(() => props.currentSong, (newSong) => {
+  if (newSong && newSong.url) {
+    // 重置状态
+    isPlaying.value = false;
+    currentTime.value = 0;
+    duration.value = 0;
     // 加载新音频
-    audioRef.value.src = newMusic.url
+    audioRef.value.src = newSong.url;
     // 自动播放
     audioRef.value.play().then(() => {
-      isPlaying.value = true
+      isPlaying.value = true;
+      // 获取歌词
+      emit('getLyrics', newSong.id, newSong.source);
     }).catch(err => {
-      ElMessage.error(`播放失败：${err.message}`)
-    })
-  } else if (!newMusic) {
-    // 无歌曲时暂停
-    audioRef.value?.pause()
-    isPlaying.value = false
+      ElMessage.error(`播放失败：${err.message}`);
+    });
+  } else if (!newSong) {
+    audioRef.value?.pause();
+    isPlaying.value = false;
   }
-})
+});
 
 // 播放/暂停切换
 const togglePlay = () => {
-  if (!props.currentMusic) return
-  
+  if (!props.currentSong) return;
   if (isPlaying.value) {
-    audioRef.value.pause()
+    audioRef.value.pause();
   } else {
     audioRef.value.play().catch(err => {
-      ElMessage.error(`播放失败：${err.message}`)
-    })
+      ElMessage.error(`播放失败：${err.message}`);
+    });
   }
-  isPlaying.value = !isPlaying.value
-}
+  isPlaying.value = !isPlaying.value;
+};
 
-// 播放事件
-const handlePlay = () => {
-  isPlaying.value = true
-}
+// 上一曲/下一曲（简易版，可扩展）
+const prevSong = () => {
+  ElMessage.info('暂未实现上一曲，可自行扩展');
+};
+const nextSong = () => {
+  ElMessage.info('暂未实现下一曲，可自行扩展');
+};
 
-// 暂停事件
-const handlePause = () => {
-  isPlaying.value = false
-}
+// 进度条控制
+const seek = (val) => {
+  audioRef.value.currentTime = val;
+  currentTime.value = val;
+};
 
-// 播放结束
+// 时间格式化
+const formatTime = (seconds) => {
+  const min = Math.floor(seconds / 60);
+  const sec = Math.floor(seconds % 60);
+  return `${min.toString().padStart(2, '0')}:${sec.toString().padStart(2, '0')}`;
+};
+
+// 音频事件处理
+const handlePlay = () => { isPlaying.value = true; };
+const handlePause = () => { isPlaying.value = false; };
+const handleTimeUpdate = () => { currentTime.value = audioRef.value.currentTime; };
+const handleLoadedMetadata = () => { duration.value = audioRef.value.duration; };
 const handleEnded = () => {
-  isPlaying.value = false
-  ElMessage.info('歌曲播放完毕')
-}
-
-// 播放错误
+  isPlaying.value = false;
+  ElMessage.info('歌曲播放完毕');
+};
 const handleError = () => {
-  isPlaying.value = false
-  ElMessage.error('音频播放失败，请检查播放链接是否有效')
-}
-
-// 下一曲（简易版，可扩展）
-const nextMusic = () => {
-  ElMessage.info('下一曲功能可自行扩展～')
-}
+  isPlaying.value = false;
+  ElMessage.error('音频播放失败，请检查播放链接是否有效');
+};
 </script>
 
 <style scoped>
-.player-container {
+.player-bar {
   position: fixed;
   bottom: 0;
   left: 0;
   right: 0;
-  height: 70px;
+  height: 80px;
   background: #fff;
   border-top: 1px solid #eee;
+  z-index: 999;
+}
+
+.player-bar .container {
   display: flex;
   align-items: center;
   justify-content: space-between;
-  padding: 0 20px;
-  z-index: 999;
+  height: 100%;
 }
-.player-info {
+
+.song-info {
   flex: 1;
-  overflow: hidden;
 }
-.player-info .name {
+
+.song-info .name {
   font-size: 14px;
   font-weight: 500;
   color: #333;
-  white-space: nowrap;
-  overflow: hidden;
-  text-overflow: ellipsis;
 }
-.player-info .singer {
+
+.song-info .singer {
   font-size: 12px;
   color: #666;
-  white-space: nowrap;
-  overflow: hidden;
-  text-overflow: ellipsis;
+  margin-top: 5px;
 }
+
 .player-controls {
   display: flex;
   gap: 10px;
 }
+
+.progress-bar {
+  display: flex;
+  align-items: center;
+  gap: 10px;
+}
+
+.time {
+  font-size: 12px;
+  color: #999;
+}
+
 audio {
   display: none;
 }
+
 /* 移动端适配 */
 @media (max-width: 768px) {
-  .player-container {
-    height: 80px;
-    flex-direction: column;
-    padding: 5px 10px;
-    justify-content: center;
+  .player-bar {
+    height: 70px;
   }
-  .player-info {
-    text-align: center;
-    margin-bottom: 5px;
+  .progress-bar {
+    display: none;
   }
 }
 </style>
