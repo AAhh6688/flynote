@@ -1,14 +1,27 @@
+/* 全局样式重置 */
 * {
   margin: 0;
   padding: 0;
   box-sizing: border-box;
 }
+
 body {
-  font-family: "Microsoft Yahei", sans-serif;
+  font-family: "Microsoft Yahei", "PingFang SC", sans-serif;
   color: #333;
   background-color: #f9f9f9;
+  /* 给底部播放器留空间 */
+  padding-bottom: 80px;
 }
-/* 适配移动端底部播放器 */
-body {
-  padding-bottom: 70px;
+
+/* 滚动条美化（可选） */
+::-webkit-scrollbar {
+  width: 6px;
+  height: 6px;
+}
+::-webkit-scrollbar-thumb {
+  background: #ccc;
+  border-radius: 3px;
+}
+::-webkit-scrollbar-track {
+  background: #f1f1f1;
 }
